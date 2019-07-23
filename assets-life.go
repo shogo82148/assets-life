@@ -188,31 +188,38 @@ func (f *httpFile) Readdir(count int) ([]os.FileInfo, error) {
 		return ret, nil
 	}
 
-	prefix := f.file.name + "/"
+	prefix := f.file.name
+	if !strings.HasSuffix(prefix, "/") {
+		prefix += "/"
+	}
 	if count <= 0 {
-		for ; f.dirIdx < len(f.fs); f.dirIdx++ {
-			name := f.fs[f.dirIdx].name
+		for f.dirIdx < len(f.fs) {
+			entry := &f.fs[f.dirIdx]
+			f.dirIdx++
+			name := entry.name
 			if !strings.HasPrefix(name, prefix) {
 				break
 			}
 			if idx := strings.IndexRune(name[len(prefix):], '/'); idx >= 0 {
 				continue
 			}
-			ret = append(ret, &f.fs[f.dirIdx])
+			ret = append(ret, entry)
 		}
 		return ret, nil
 	}
 
 	ret = make([]os.FileInfo, 0, count)
-	for ; f.dirIdx < len(f.fs); f.dirIdx++ {
-		name := f.fs[f.dirIdx].name
+	for f.dirIdx < len(f.fs) {
+		entry := &f.fs[f.dirIdx]
+		f.dirIdx++
+		name := entry.name
 		if !strings.HasPrefix(name, prefix) {
 			return ret, io.EOF
 		}
 		if idx := strings.IndexRune(name[len(prefix):], '/'); idx >= 0 {
 			continue
 		}
-		ret = append(ret, &f.fs[f.dirIdx])
+		ret = append(ret, entry)
 		if len(ret) == count {
 			return ret, nil
 		}
