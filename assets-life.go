@@ -118,7 +118,11 @@ type fileSystem []file
 func (fs fileSystem) Open(name string) (http.File, error) {
 	i := sort.Search(len(fs), func(i int) bool { return fs[i].name >= name })
 	if i >= len(fs) || fs[i].name != name {
-		return nil, os.ErrNotExist
+		return nil, &os.PathError{
+			Op:   "open",
+			Path: name,
+			Err:  os.ErrNotExist,
+		}
 	}
 	f := &fs[i]
 	return &httpFile{
