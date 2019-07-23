@@ -24,8 +24,11 @@ func TestFile(t *testing.T) {
 	if stat.Size() != 0 {
 		t.Errorf("unexpected size: want %d, got %d", 0, stat.Size())
 	}
-	if stat.Mode() != 0755 {
-		t.Errorf("unexpected mode: want %s, got %s", os.FileMode(0755), stat.Mode())
+
+	// group and others' permissions are depends on the environment.
+	// so, we check only owner's permission.
+	if stat.Mode()&0700 != 0700 {
+		t.Errorf("unexpected mode: want %s, got %s", os.FileMode(0700), stat.Mode()&0700)
 	}
 
 	b, err := ioutil.ReadAll(f)
