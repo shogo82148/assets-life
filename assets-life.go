@@ -12,6 +12,7 @@ import (
 	"os"
 	pkgpath "path"
 	"path/filepath"
+	"strings"
 )
 
 func main() {
@@ -78,6 +79,11 @@ var Root http.FileSystem = fileSystem{
 `
 	fmt.Fprintf(f, header, filename, "go:generate go run "+filename+" \""+rel+"\" . "+name, name)
 	err = filepath.Walk(in, func(path string, info os.FileInfo, err error) error {
+		// ignore hidden files
+		if strings.HasPrefix(info.Name(), ".") {
+			return nil
+		}
+
 		fmt.Fprintf(f, "\tfile{\n")
 		if info.IsDir() {
 			fmt.Fprintln(f, "\t\tcontent: \"\",")
@@ -235,6 +241,7 @@ import (
 	"os"
 	pkgpath "path"
 	"path/filepath"
+	"strings"
 )
 
 func main() {
@@ -279,6 +286,11 @@ func build(in, out, name string) error {
 	header := %c%s%c
 	fmt.Fprintf(f, header, filename, "go:generate go run "+filename+" \""+rel+"\" . "+name, name)
 	err = filepath.Walk(in, func(path string, info os.FileInfo, err error) error {
+		// ignore hidden files
+		if strings.HasPrefix(info.Name(), ".") {
+			return nil
+		}
+
 		fmt.Fprintf(f, "\tfile{\n")
 		if info.IsDir() {
 			fmt.Fprintln(f, "\t\tcontent: \"\",")
