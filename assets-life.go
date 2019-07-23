@@ -79,7 +79,9 @@ var Root http.FileSystem = fileSystem{
 	fmt.Fprintf(f, header, filename, "go:generate go run "+filename+" \""+rel+"\" . "+name, name)
 	err = filepath.Walk(in, func(path string, info os.FileInfo, err error) error {
 		fmt.Fprintf(f, "\tfile{\n")
-		if !info.IsDir() {
+		if info.IsDir() {
+			fmt.Fprintln(f, "\t\tcontent: \"\",")
+		} else {
 			b, err := ioutil.ReadFile(path)
 			if err != nil {
 				return err
@@ -90,9 +92,9 @@ var Root http.FileSystem = fileSystem{
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(f, "\t\tname: %q,\n", pkgpath.Clean("/"+filepath.ToSlash(rel)))
+		fmt.Fprintf(f, "\t\tname:    %q,\n", pkgpath.Clean("/"+filepath.ToSlash(rel)))
 		mode := info.Mode()
-		fmt.Fprintf(f, "\t\tmode:   0%03o", int(mode.Perm()))
+		fmt.Fprintf(f, "\t\tmode:    0%03o", int(mode.Perm()))
 		if mode.IsDir() {
 			fmt.Fprintf(f, " | os.ModeDir")
 		}
@@ -278,7 +280,9 @@ func build(in, out, name string) error {
 	fmt.Fprintf(f, header, filename, "go:generate go run "+filename+" \""+rel+"\" . "+name, name)
 	err = filepath.Walk(in, func(path string, info os.FileInfo, err error) error {
 		fmt.Fprintf(f, "\tfile{\n")
-		if !info.IsDir() {
+		if info.IsDir() {
+			fmt.Fprintln(f, "\t\tcontent: \"\",")
+		} else {
 			b, err := ioutil.ReadFile(path)
 			if err != nil {
 				return err
@@ -289,9 +293,9 @@ func build(in, out, name string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(f, "\t\tname: %%q,\n", pkgpath.Clean("/"+filepath.ToSlash(rel)))
+		fmt.Fprintf(f, "\t\tname:    %%q,\n", pkgpath.Clean("/"+filepath.ToSlash(rel)))
 		mode := info.Mode()
-		fmt.Fprintf(f, "\t\tmode:   0%%03o", int(mode.Perm()))
+		fmt.Fprintf(f, "\t\tmode:    0%%03o", int(mode.Perm()))
 		if mode.IsDir() {
 			fmt.Fprintf(f, " | os.ModeDir")
 		}
