@@ -67,6 +67,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path"
 	"sort"
 	"strings"
 	"time"
@@ -75,7 +76,7 @@ import (
 // Root is the root of the file system.
 var Root http.FileSystem = fileSystem{
 `
-	fmt.Fprintf(f, header, filename, "go:generate go run "+filename+" \""+rel+"\" . " + name, name)
+	fmt.Fprintf(f, header, filename, "go:generate go run "+filename+" \""+rel+"\" . "+name, name)
 	err = filepath.Walk(in, func(path string, info os.FileInfo, err error) error {
 		fmt.Fprintf(f, "\tfile{\n")
 		if !info.IsDir() {
@@ -130,7 +131,7 @@ type file struct {
 var _ os.FileInfo = (*file)(nil)
 
 func (f *file) Name() string {
-	return f.name
+	return path.Base(f.name)
 }
 
 func (f *file) Size() int64 {
@@ -274,7 +275,7 @@ func build(in, out, name string) error {
 		return err
 	}
 	header := %c%s%c
-	fmt.Fprintf(f, header, filename, "go:generate go run "+filename+" \""+rel+"\" . " + name, name)
+	fmt.Fprintf(f, header, filename, "go:generate go run "+filename+" \""+rel+"\" . "+name, name)
 	err = filepath.Walk(in, func(path string, info os.FileInfo, err error) error {
 		fmt.Fprintf(f, "\tfile{\n")
 		if !info.IsDir() {
