@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func Test(t *testing.T) {
+func TestFile(t *testing.T) {
 	f, err := Root.Open("/file.txt")
 	if err != nil {
 		t.Fatal(err)
@@ -34,5 +34,12 @@ func Test(t *testing.T) {
 	}
 	if string(b) != "" {
 		t.Errorf("unexpected content: want empty, got %v", string(b))
+	}
+}
+
+func TestHiddenFile(t *testing.T) {
+	_, err := Root.Open("/.hidden_file")
+	if !os.IsNotExist(err) {
+		t.Errorf("hidden file will be not exist, but %v", err)
 	}
 }
