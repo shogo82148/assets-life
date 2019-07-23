@@ -17,7 +17,7 @@ import (
 func main() {
 	if len(os.Args) <= 2 {
 		log.Println("Usage:")
-		log.Println(os.Args[0] + " IN_DIR OUT_DIR")
+		log.Println(os.Args[0] + " INPUT_DIR OUTPUT_DIR [PACKAGE_NAME]")
 		os.Exit(2)
 	}
 	in, err := filepath.Abs(os.Args[1])
@@ -28,12 +28,19 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := build(in, out); err != nil {
+	var name string
+	if len(os.Args) > 3 {
+		name = os.Args[3]
+	}
+	if name == "" {
+		name = filepath.Base(out)
+	}
+	if err := build(in, out, name); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func build(in, out string) error {
+func build(in, out, name string) error {
 	filename := "assets-life.go"
 	rel, err := filepath.Rel(out, in)
 	if err != nil {
@@ -54,7 +61,7 @@ func build(in, out string) error {
 
 //%s
 
-package pack
+package %s
 
 import (
 	"io"
@@ -68,7 +75,7 @@ import (
 // Root is the root of the file system.
 var Root http.FileSystem = fileSystem{
 `
-	fmt.Fprintf(f, header, filename, "go:generate go run "+filename+" \""+rel+"\" .")
+	fmt.Fprintf(f, header, filename, "go:generate go run "+filename+" \""+rel+"\" . " + name, name)
 	err = filepath.Walk(in, func(path string, info os.FileInfo, err error) error {
 		fmt.Fprintf(f, "\tfile{\n")
 		if !info.IsDir() {
@@ -230,7 +237,7 @@ import (
 func main() {
 	if len(os.Args) <= 2 {
 		log.Println("Usage:")
-		log.Println(os.Args[0] + " IN_DIR OUT_DIR")
+		log.Println(os.Args[0] + " INPUT_DIR OUTPUT_DIR [PACKAGE_NAME]")
 		os.Exit(2)
 	}
 	in, err := filepath.Abs(os.Args[1])
@@ -241,12 +248,19 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := build(in, out); err != nil {
+	var name string
+	if len(os.Args) > 3 {
+		name = os.Args[3]
+	}
+	if name == "" {
+		name = filepath.Base(out)
+	}
+	if err := build(in, out, name); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func build(in, out string) error {
+func build(in, out, name string) error {
 	filename := "assets-life.go"
 	rel, err := filepath.Rel(out, in)
 	if err != nil {
@@ -260,7 +274,7 @@ func build(in, out string) error {
 		return err
 	}
 	header := %c%s%c
-	fmt.Fprintf(f, header, filename, "go:generate go run "+filename+" \""+rel+"\" .")
+	fmt.Fprintf(f, header, filename, "go:generate go run "+filename+" \""+rel+"\" . " + name, name)
 	err = filepath.Walk(in, func(path string, info os.FileInfo, err error) error {
 		fmt.Fprintf(f, "\tfile{\n")
 		if !info.IsDir() {
