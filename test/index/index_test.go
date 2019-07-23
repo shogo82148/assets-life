@@ -29,6 +29,14 @@ func BenchmarkOpen(b *testing.B) {
 	}
 }
 
+func BenchmarkOpen_Parallel(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			Root.Open("/index.html")
+		}
+	})
+}
+
 func BenchmarkReaddir(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		dir, _ := Root.Open("/")
