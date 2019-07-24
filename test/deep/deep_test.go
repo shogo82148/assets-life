@@ -26,10 +26,8 @@ func Test(t *testing.T) {
 			t.Errorf("unexpected size: want %d, got %d", 0, stat.Size())
 		}
 
-		// group and others' permissions are depends on the environment.
-		// so, we check only owner's permission.
-		if stat.Mode()&0700 != 0600 {
-			t.Errorf("unexpected mode: want %s, got %s", os.FileMode(0600), stat.Mode()&0700)
+		if stat.Mode() != 0644 {
+			t.Errorf("unexpected mode: want %s, got %s", os.FileMode(0644), stat.Mode())
 		}
 
 		b, err := ioutil.ReadAll(f)
@@ -60,10 +58,8 @@ func Test(t *testing.T) {
 			t.Errorf("unexpected size: want %d, got %d", 0, stat.Size())
 		}
 
-		// group and others' permissions are depends on the environment.
-		// so, we check only owner's permission.
-		if stat.Mode()&0700 != 0600 {
-			t.Errorf("unexpected mode: want %s, got %s", os.FileMode(0600), stat.Mode()&0700)
+		if stat.Mode() != 0644 {
+			t.Errorf("unexpected mode: want %s, got %s", os.FileMode(0644), stat.Mode())
 		}
 
 		b, err := ioutil.ReadAll(f)
@@ -114,10 +110,8 @@ func Test(t *testing.T) {
 			t.Error("want directory, but it is not")
 		}
 
-		// group and others' permissions are depends on the environment.
-		// so, we check only owner's permission.
-		if stat.Mode()&0700 != 0700 {
-			t.Errorf("unexpected mode: want %s, got %s", os.FileMode(0700), stat.Mode()&0700)
+		if stat.Mode() != 0755|os.ModeDir {
+			t.Errorf("unexpected mode: want %s, got %s", 0755|os.ModeDir, stat.Mode())
 		}
 	})
 
@@ -137,10 +131,8 @@ func Test(t *testing.T) {
 			t.Error("want directory, but it is not")
 		}
 
-		// group and others' permissions are depends on the environment.
-		// so, we check only owner's permission.
-		if stat.Mode()&0700 != 0700 {
-			t.Errorf("unexpected mode: want %s, got %s", os.FileMode(0700), stat.Mode()&0700)
+		if stat.Mode() != 0755|os.ModeDir {
+			t.Errorf("unexpected mode: want %s, got %s", 0755|os.ModeDir, stat.Mode())
 		}
 	})
 }
