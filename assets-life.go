@@ -11,14 +11,14 @@
 // The assets-life command generates a package that have embed small in-memory file system.
 //
 //     assets-life /path/to/your/project/public public
-// 
+//
 // You can access the file system by accessing a public variable Root of the generated package.
-// 
+//
 //     import (
 //         "net/http"
 //         "./public" // TODO: Replace with the absolute import path
 //     )
-//     
+//
 //     func main() {
 //         http.Handle("/", http.FileServer(public.Root))
 //         http.ListenAndServe(":8080", nil)
@@ -125,11 +125,16 @@ var Root http.FileSystem = fileSystem{
 		}
 		fmt.Fprintf(f, "\t\tname:    %q,\n", pkgpath.Clean("/"+filepath.ToSlash(rel)))
 		mode := info.Mode()
-		fmt.Fprintf(f, "\t\tmode:    0%03o", int(mode.Perm()))
-		if mode.IsDir() {
-			fmt.Fprintf(f, " | os.ModeDir")
+		switch {
+		case (mode&os.ModeType)|os.ModeDir != os.ModeDir:
+			return fmt.Errorf("unsupported file type: %s", mode)
+		case mode.IsDir(): // directory
+			fmt.Fprintln(f, "\t\tmode:    0755 | os.ModeDir,")
+		case mode&0100 != 0: // executable file
+			fmt.Fprintln(f, "\t\tmode:    0755,")
+		default:
+			fmt.Fprintln(f, "\t\tmode:    0644,")
 		}
-		fmt.Fprint(f, ",\n")
 		fmt.Fprint(f, "\t},\n")
 		return nil
 	})
@@ -276,14 +281,14 @@ func (f *httpFile) Close() error {
 // The assets-life command generates a package that have embed small in-memory file system.
 //
 //     assets-life /path/to/your/project/public public
-// 
+//
 // You can access the file system by accessing a public variable Root of the generated package.
-// 
+//
 //     import (
 //         "net/http"
 //         "./public" // TODO: Replace with the absolute import path
 //     )
-//     
+//
 //     func main() {
 //         http.Handle("/", http.FileServer(public.Root))
 //         http.ListenAndServe(":8080", nil)
@@ -372,11 +377,16 @@ func build(in, out, name string) error {
 		}
 		fmt.Fprintf(f, "\t\tname:    %%q,\n", pkgpath.Clean("/"+filepath.ToSlash(rel)))
 		mode := info.Mode()
-		fmt.Fprintf(f, "\t\tmode:    0%%03o", int(mode.Perm()))
-		if mode.IsDir() {
-			fmt.Fprintf(f, " | os.ModeDir")
+		switch {
+		case (mode&os.ModeType)|os.ModeDir != os.ModeDir:
+			return fmt.Errorf("unsupported file type: %%s", mode)
+		case mode.IsDir(): // directory
+			fmt.Fprintln(f, "\t\tmode:    0755 | os.ModeDir,")
+		case mode&0100 != 0: // executable file
+			fmt.Fprintln(f, "\t\tmode:    0755,")
+		default:
+			fmt.Fprintln(f, "\t\tmode:    0644,")
 		}
-		fmt.Fprint(f, ",\n")
 		fmt.Fprint(f, "\t},\n")
 		return nil
 	})
