@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/shogo82148/assets-life.svg?branch=master)](https://travis-ci.com/shogo82148/assets-life)
+
 # assets-life
 
 assets-life is a very simple embedding asset generator.
