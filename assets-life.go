@@ -2,7 +2,36 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in https://github.com/shogo82148/assets-life/blob/master/LICENSE
 
-// This program generates filesystem.go and assets-life.go itself.
+// assets-life is a very simple embedding asset generator.
+// It generates an embed small in-memory file system that is served from an http.FileSystem.
+// Install the command line tool first.
+//
+//     go get github.com/shogo82148/assets-life
+//
+// The assets-life command generates a package that have embed small in-memory file system.
+//
+//     assets-life /path/to/your/project/public public
+// 
+// You can access the file system by accessing a public variable Root of the generated package.
+// 
+//     import (
+//         "net/http"
+//         "./public" // TODO: Replace with the absolute import path
+//     )
+//     
+//     func main() {
+//         http.Handle("/", http.FileServer(public.Root))
+//         http.ListenAndServe(":8080", nil)
+//     }
+//
+// Visit http://localhost:8080/path/to/file to see your file.
+//
+// The assets-life command also embed go:generate directive into generated code, and assets-life itself.
+// It allows you to re-generate the package using go generate.
+//
+//     go generate ./public
+//
+// The assets-life command is no longer needed because it is embedded into the generated package.
 package main
 
 import (
@@ -238,7 +267,36 @@ func (f *httpFile) Close() error {
 
 // +build ignore
 
-// This program generates filesystem.go and assets-life.go itself.
+// assets-life is a very simple embedding asset generator.
+// It generates an embed small in-memory file system that is served from an http.FileSystem.
+// Install the command line tool first.
+//
+//     go get github.com/shogo82148/assets-life
+//
+// The assets-life command generates a package that have embed small in-memory file system.
+//
+//     assets-life /path/to/your/project/public public
+// 
+// You can access the file system by accessing a public variable Root of the generated package.
+// 
+//     import (
+//         "net/http"
+//         "./public" // TODO: Replace with the absolute import path
+//     )
+//     
+//     func main() {
+//         http.Handle("/", http.FileServer(public.Root))
+//         http.ListenAndServe(":8080", nil)
+//     }
+//
+// Visit http://localhost:8080/path/to/file to see your file.
+//
+// The assets-life command also embed go:generate directive into generated code, and assets-life itself.
+// It allows you to re-generate the package using go generate.
+//
+//     go generate ./public
+//
+// The assets-life command is no longer needed because it is embedded into the generated package.
 package main
 
 import (
