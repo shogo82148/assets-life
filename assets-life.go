@@ -39,7 +39,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	pkgpath "path"
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -103,43 +103,83 @@ import (
 var Root http.FileSystem = fileSystem{
 `
 	fmt.Fprintf(f, header, filename, "go:generate go run "+filename+" \""+rel+"\" . "+name, name)
+
+	type file struct {
+		path     string
+		mode     os.FileMode
+		children []int
+		next     int
+	}
+	index := map[string]int{}
+	files := []file{}
+
+	var i int
 	err = filepath.Walk(in, func(path string, info os.FileInfo, err error) error {
 		// ignore hidden files
 		if strings.HasPrefix(info.Name(), ".") {
 			return nil
 		}
 
+		if (info.Mode()&os.ModeType)|os.ModeDir != os.ModeDir {
+			return fmt.Errorf("unsupported file type: %s, mode %s", path, info.Mode())
+		}
+
+		index[path] = i
+		files = append(files, file{
+			path: path,
+			mode: info.Mode(),
+		})
+		parent := filepath.Dir(path)
+		if idx, ok := index[parent]; ok {
+			files[idx].children = append(files[idx].children, i)
+		}
+		i++
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	for _, ff := range files {
+		// search neighborhood
+		for i := range ff.children {
+			next := -1
+			if i+1 < len(ff.children) {
+				next = ff.children[i+1]
+			}
+			files[ff.children[i]].next = next
+		}
+
 		fmt.Fprintf(f, "\tfile{\n")
-		if info.IsDir() {
+		rel, err := filepath.Rel(in, ff.path)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(f, "\t\tname:    %q,\n", path.Clean("/"+filepath.ToSlash(rel)))
+		if ff.mode.IsDir() {
 			fmt.Fprintln(f, "\t\tcontent: \"\",")
 		} else {
-			b, err := ioutil.ReadFile(path)
+			b, err := ioutil.ReadFile(ff.path)
 			if err != nil {
 				return err
 			}
 			fmt.Fprintf(f, "\t\tcontent: %q,\n", string(b))
 		}
-		rel, err := filepath.Rel(in, path)
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(f, "\t\tname:    %q,\n", pkgpath.Clean("/"+filepath.ToSlash(rel)))
-		mode := info.Mode()
 		switch {
-		case (mode&os.ModeType)|os.ModeDir != os.ModeDir:
-			return fmt.Errorf("unsupported file type: %s", mode)
-		case mode.IsDir(): // directory
+		case ff.mode.IsDir(): // directory
 			fmt.Fprintln(f, "\t\tmode:    0755 | os.ModeDir,")
-		case mode&0100 != 0: // executable file
+		case ff.mode&0100 != 0: // executable file
 			fmt.Fprintln(f, "\t\tmode:    0755,")
 		default:
 			fmt.Fprintln(f, "\t\tmode:    0644,")
 		}
+		fmt.Fprintf(f, "\t\tnext:    %d,\n", ff.next)
+		if len(ff.children) > 0 {
+			fmt.Fprintf(f, "\t\tchild:   %d,\n", ff.children[0])
+		} else {
+			fmt.Fprint(f, "\t\tchild:   -1,\n")
+		}
 		fmt.Fprint(f, "\t},\n")
-		return nil
-	})
-	if err != nil {
-		return err
 	}
 	footer := `}
 
@@ -160,7 +200,7 @@ func (fs fileSystem) Open(name string) (http.File, error) {
 		file:   f,
 		fs:     fs,
 		idx:    i,
-		dirIdx: i + 1,
+		dirIdx: f.child,
 	}, nil
 }
 
@@ -168,6 +208,8 @@ type file struct {
 	name    string
 	content string
 	mode    os.FileMode
+	child   int
+	next    int
 }
 
 var _ os.FileInfo = (*file)(nil)
@@ -218,38 +260,20 @@ func (f *httpFile) Readdir(count int) ([]os.FileInfo, error) {
 		return ret, nil
 	}
 
-	prefix := f.file.name
-	if !strings.HasSuffix(prefix, "/") {
-		prefix += "/"
-	}
 	if count <= 0 {
-		for f.dirIdx < len(f.fs) {
+		for f.dirIdx >= 0 {
 			entry := &f.fs[f.dirIdx]
-			f.dirIdx++
-			name := entry.name
-			if !strings.HasPrefix(name, prefix) {
-				break
-			}
-			if idx := strings.IndexRune(name[len(prefix):], '/'); idx >= 0 {
-				continue
-			}
 			ret = append(ret, entry)
+			f.dirIdx = entry.next
 		}
 		return ret, nil
 	}
 
 	ret = make([]os.FileInfo, 0, count)
-	for f.dirIdx < len(f.fs) {
+	for f.dirIdx >= 0 {
 		entry := &f.fs[f.dirIdx]
-		f.dirIdx++
-		name := entry.name
-		if !strings.HasPrefix(name, prefix) {
-			return ret, io.EOF
-		}
-		if idx := strings.IndexRune(name[len(prefix):], '/'); idx >= 0 {
-			continue
-		}
 		ret = append(ret, entry)
+		f.dirIdx = entry.next
 		if len(ret) == count {
 			return ret, nil
 		}
@@ -309,7 +333,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	pkgpath "path"
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -355,43 +379,83 @@ func build(in, out, name string) error {
 	}
 	header := %c%s%c
 	fmt.Fprintf(f, header, filename, "go:generate go run "+filename+" \""+rel+"\" . "+name, name)
+
+	type file struct {
+		path     string
+		mode     os.FileMode
+		children []int
+		next     int
+	}
+	index := map[string]int{}
+	files := []file{}
+
+	var i int
 	err = filepath.Walk(in, func(path string, info os.FileInfo, err error) error {
 		// ignore hidden files
 		if strings.HasPrefix(info.Name(), ".") {
 			return nil
 		}
 
+		if (info.Mode()&os.ModeType)|os.ModeDir != os.ModeDir {
+			return fmt.Errorf("unsupported file type: %%s, mode %%s", path, info.Mode())
+		}
+
+		index[path] = i
+		files = append(files, file{
+			path: path,
+			mode: info.Mode(),
+		})
+		parent := filepath.Dir(path)
+		if idx, ok := index[parent]; ok {
+			files[idx].children = append(files[idx].children, i)
+		}
+		i++
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	for _, ff := range files {
+		// search neighborhood
+		for i := range ff.children {
+			next := -1
+			if i+1 < len(ff.children) {
+				next = ff.children[i+1]
+			}
+			files[ff.children[i]].next = next
+		}
+
 		fmt.Fprintf(f, "\tfile{\n")
-		if info.IsDir() {
+		rel, err := filepath.Rel(in, ff.path)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(f, "\t\tname:    %%q,\n", path.Clean("/"+filepath.ToSlash(rel)))
+		if ff.mode.IsDir() {
 			fmt.Fprintln(f, "\t\tcontent: \"\",")
 		} else {
-			b, err := ioutil.ReadFile(path)
+			b, err := ioutil.ReadFile(ff.path)
 			if err != nil {
 				return err
 			}
 			fmt.Fprintf(f, "\t\tcontent: %%q,\n", string(b))
 		}
-		rel, err := filepath.Rel(in, path)
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(f, "\t\tname:    %%q,\n", pkgpath.Clean("/"+filepath.ToSlash(rel)))
-		mode := info.Mode()
 		switch {
-		case (mode&os.ModeType)|os.ModeDir != os.ModeDir:
-			return fmt.Errorf("unsupported file type: %%s", mode)
-		case mode.IsDir(): // directory
+		case ff.mode.IsDir(): // directory
 			fmt.Fprintln(f, "\t\tmode:    0755 | os.ModeDir,")
-		case mode&0100 != 0: // executable file
+		case ff.mode&0100 != 0: // executable file
 			fmt.Fprintln(f, "\t\tmode:    0755,")
 		default:
 			fmt.Fprintln(f, "\t\tmode:    0644,")
 		}
+		fmt.Fprintf(f, "\t\tnext:    %%d,\n", ff.next)
+		if len(ff.children) > 0 {
+			fmt.Fprintf(f, "\t\tchild:   %%d,\n", ff.children[0])
+		} else {
+			fmt.Fprint(f, "\t\tchild:   -1,\n")
+		}
 		fmt.Fprint(f, "\t},\n")
-		return nil
-	})
-	if err != nil {
-		return err
 	}
 	footer := %c%s%c
 	fmt.Fprintln(f, footer)
