@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/shogo82148/assets-life.svg?branch=master)](https://travis-ci.com/shogo82148/assets-life)
+[![Build Status](https://github.com/shogo82148/assets-life/workflows/Test/badge.svg)](https://github.com/shogo82148/assets-life/actions)
 
 # assets-life
 
