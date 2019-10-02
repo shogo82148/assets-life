@@ -17,7 +17,7 @@ func Test(t *testing.T) {
 	}
 
 	// normalize line feed marks
-	a = bytes.Replace(b, []byte("\r\n"), []byte("\n"), -1)
+	a = bytes.Replace(a, []byte("\r\n"), []byte("\n"), -1)
 	b = bytes.Replace(b, []byte("\r\n"), []byte("\n"), -1)
 
 	// the first generation does not have the Build Constraints for "go get"
