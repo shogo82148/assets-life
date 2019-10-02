@@ -3,6 +3,7 @@ package file
 import (
 	"io/ioutil"
 	"os"
+	"runtime"
 	"testing"
 )
 
@@ -25,8 +26,12 @@ func TestFile(t *testing.T) {
 		t.Errorf("unexpected size: want %d, got %d", 0, stat.Size())
 	}
 
-	if stat.Mode() != 0755 {
-		t.Errorf("unexpected mode: want %s, got %s", os.FileMode(0755), stat.Mode())
+	var mode os.FileMode = 0755
+	if runtime.GOOS == "windows" {
+		mode = 0644
+	}
+	if stat.Mode() != mode {
+		t.Errorf("unexpected mode: want %s, got %s", mode, stat.Mode())
 	}
 
 	b, err := ioutil.ReadAll(f)
