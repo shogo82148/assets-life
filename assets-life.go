@@ -397,6 +397,10 @@ func build(in, out, name string) error {
 
 	var i int
 	err = filepath.Walk(in, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
 		// ignore hidden files
 		if strings.HasPrefix(info.Name(), ".") {
 			return nil
