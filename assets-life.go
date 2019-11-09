@@ -102,6 +102,7 @@ import (
 // Root is the root of the file system.
 var Root http.FileSystem = fileSystem{
 `
+	rel = filepath.ToSlash(rel)
 	fmt.Fprintf(f, header, filename, "go:generate go run "+filename+" \""+rel+"\" . "+name, name)
 
 	type file struct {
@@ -115,6 +116,10 @@ var Root http.FileSystem = fileSystem{
 
 	var i int
 	err = filepath.Walk(in, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
 		// ignore hidden files
 		if strings.HasPrefix(info.Name(), ".") {
 			return nil
@@ -378,6 +383,7 @@ func build(in, out, name string) error {
 		return err
 	}
 	header := %c%s%c
+	rel = filepath.ToSlash(rel)
 	fmt.Fprintf(f, header, filename, "go:generate go run "+filename+" \""+rel+"\" . "+name, name)
 
 	type file struct {
@@ -391,6 +397,10 @@ func build(in, out, name string) error {
 
 	var i int
 	err = filepath.Walk(in, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
 		// ignore hidden files
 		if strings.HasPrefix(info.Name(), ".") {
 			return nil
