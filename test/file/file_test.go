@@ -43,6 +43,20 @@ func TestFile(t *testing.T) {
 	}
 }
 
+func TestWithoutSlash(t *testing.T) {
+	f, err := Root.Open("file.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	stat, err := f.Stat()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stat.Name() != "file.txt" {
+		t.Errorf("unexpected name: want %q, got %q", "file.txt", stat.Name())
+	}
+}
+
 func TestHiddenFile(t *testing.T) {
 	_, err := Root.Open("/.hidden_file")
 	if !os.IsNotExist(err) {
