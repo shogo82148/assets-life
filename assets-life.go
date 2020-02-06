@@ -44,6 +44,8 @@ import (
 	"strings"
 )
 
+const version = "1.0.0"
+
 func main() {
 	if len(os.Args) <= 2 {
 		log.Println("Usage:")
@@ -344,6 +346,8 @@ import (
 	"strings"
 )
 
+const version = "%s"
+
 func main() {
 	if len(os.Args) <= 2 {
 		log.Println("Usage:")
@@ -476,14 +480,14 @@ func build(in, out, name string) error {
 
 	f, err = os.OpenFile(filepath.Join(out, filename), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	format := %c%s%c
-	fmt.Fprintf(f, format, 96, header, 96, 96, footer, 96, 96, format, 96)
+	fmt.Fprintf(f, format, version, 96, header, 96, 96, footer, 96, 96, format, 96)
 	if err := f.Close(); err != nil {
 		return err
 	}
 	return nil
 }
 `
-	fmt.Fprintf(f, format, 96, header, 96, 96, footer, 96, 96, format, 96)
+	fmt.Fprintf(f, format, version, 96, header, 96, 96, footer, 96, 96, format, 96)
 	if err := f.Close(); err != nil {
 		return err
 	}
