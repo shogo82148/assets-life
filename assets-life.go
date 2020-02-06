@@ -94,7 +94,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -192,7 +191,7 @@ var Root http.FileSystem = fileSystem{
 type fileSystem []file
 
 func (fs fileSystem) Open(name string) (http.File, error) {
-	name = filepath.FromSlash(path.Clean("/" + name))
+	name = path.Clean("/" + name)
 	i := sort.Search(len(fs), func(i int) bool { return fs[i].name >= name })
 	if i >= len(fs) || fs[i].name != name {
 		return nil, &os.PathError{
