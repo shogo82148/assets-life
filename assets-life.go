@@ -298,6 +298,9 @@ func (f *httpFile) Close() error {
 	}
 
 	f, err = os.OpenFile(filepath.Join(out, filename), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
 	format := `// Copyright (C) 2019 ICHINOSE Shogo All rights reserved.
 // Use of this source code is governed by a MIT-style
 // license that can be found in https://github.com/shogo82148/assets-life/blob/master/LICENSE
@@ -479,6 +482,9 @@ func build(in, out, name string) error {
 	}
 
 	f, err = os.OpenFile(filepath.Join(out, filename), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
 	format := %c%s%c
 	fmt.Fprintf(f, format, version, 96, header, 96, 96, footer, 96, 96, format, 96)
 	if err := f.Close(); err != nil {
