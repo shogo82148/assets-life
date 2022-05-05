@@ -1,6 +1,6 @@
 // Copyright (C) 2019 ICHINOSE Shogo All rights reserved.
 // Use of this source code is governed by a MIT-style
-// license that can be found in https://github.com/shogo82148/assets-life/blob/master/LICENSE
+// license that can be found in https://github.com/shogo82148/assets-life/blob/main/LICENSE
 
 // assets-life is a very simple embedding asset generator.
 // It generates an embed small in-memory file system that is served from an http.FileSystem.
@@ -303,7 +303,7 @@ func (f *httpFile) Close() error {
 	}
 	format := `// Copyright (C) 2019 ICHINOSE Shogo All rights reserved.
 // Use of this source code is governed by a MIT-style
-// license that can be found in https://github.com/shogo82148/assets-life/blob/master/LICENSE
+// license that can be found in https://github.com/shogo82148/assets-life/blob/main/LICENSE
 
 // +build ignore
 
