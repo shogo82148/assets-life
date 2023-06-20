@@ -21,7 +21,7 @@ func Test(t *testing.T) {
 	b = bytes.Replace(b, []byte("\r\n"), []byte("\n"), -1)
 
 	// the first generation does not have the Build Constraints for "go get"
-	b = bytes.Replace(b, []byte("\n// +build ignore\n"), []byte(""), 1)
+	b = bytes.Replace(b, []byte("\n//go:build ignore\n// +build ignore\n"), []byte(""), 1)
 
 	if string(a) != string(b) {
 		t.Error("do not match", string(b))
