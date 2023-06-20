@@ -10,7 +10,7 @@ It generates an embed small in-memory file system that is served from an http.Fi
 Install the command line tool first.
 
 ```
-go get github.com/shogo82148/assets-life
+go install github.com/shogo82148/assets-life@latest
 ```
 
 The assets-life command generates a package that have embed small in-memory file system.
@@ -35,7 +35,7 @@ func main() {
 
 Visit http://localhost:8080/path/to/file to see your file.
 
-The assets-life command also embed go:generate directive into generated code, and assets-life itself.
+The assets-life command also embed `go:generate` directive into the generated code, and assets-life itself.
 It allows you to re-generate the package using go generate.
 
 ```
