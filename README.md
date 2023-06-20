@@ -1,3 +1,9 @@
+# ARCHIVED!
+
+From Go 1.16, Go officially supports embedded files by using [the embed package](https://pkg.go.dev/embed).
+Please use [the embed package](https://pkg.go.dev/embed) instead assets-life.
+assets-life is no longer maintained.
+
 [![Build Status](https://github.com/shogo82148/assets-life/workflows/Test/badge.svg)](https://github.com/shogo82148/assets-life/actions)
 
 # assets-life
@@ -42,4 +48,12 @@ It allows you to re-generate the package using go generate.
 go generate ./public
 ```
 
-The assets-life command is no longer needed because it is embedded into the generated package.
+The assets-life command is implemented as a [Quine (computing)](https://en.wikipedia.org/wiki/Quine_(computing))
+and embedded into the generated package.
+So the command is no longer needed.
+
+## References
+
+- [Goのバイナリに静的ファイルを埋め込むツール assets-life を書いた (written in Japanese)](https://shogo82148.github.io/blog/2019/07/24/assets-life/)
+- [the embed package](https://pkg.go.dev/embed)
+- [Quine (computing)](https://en.wikipedia.org/wiki/Quine_(computing))
